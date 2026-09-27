@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Khung nét đứt nhắc người dùng rằng dữ liệu ở lại trên máy.
+/// Dashed box reminding the user that their data stays on the device.
 ///
-/// Mục 5.4 của báo cáo: thuộc tính riêng tư chỉ có giá trị nếu người dùng
-/// *biết* nó đang được bảo đảm, nên thông điệp này được đặt ngay trên màn hình.
+/// Section 5.4 of the report: the privacy property is only valuable if the user
+/// *knows* it is being guaranteed, so this message is placed right on the screen.
 class PrivacyNote extends StatelessWidget {
   const PrivacyNote({
     super.key,

@@ -1,4 +1,4 @@
-/// Nguồn gốc của một giao dịch - tương ứng enum TxSource trong class diagram.
+/// Origin of a transaction - corresponds to the TxSource enum in the class diagram.
 enum TxSource {
   ocrCapture,
   manualEntry,
@@ -20,7 +20,7 @@ class Transaction {
   final DateTime timestamp;
   final TxSource source;
 
-  /// Độ tin cậy OCR 0..1 (chỉ có ý nghĩa khi source != manualEntry).
+  /// OCR confidence 0..1 (only meaningful when source != manualEntry).
   final double ocrConfidence;
 
   const Transaction({

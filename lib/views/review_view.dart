@@ -14,8 +14,8 @@ import 'manual_transaction_view.dart';
 
 /// Mockup 4: OCR Review & Confirm - "Check the details".
 ///
-/// Mọi trường OCR đều là input sửa được, và cảnh báo chỉ đích danh trường
-/// mà bộ nhận dạng kém tự tin nhất (mục 5.4), nên việc sửa chỉ tốn một chạm.
+/// Every OCR field is an editable input, and the warning names exactly the field
+/// the recogniser is least confident about (section 5.4), so a fix takes only one tap.
 class ReviewView extends StatefulWidget {
   const ReviewView({super.key, this.imageFile});
 
@@ -84,8 +84,8 @@ class _ReviewViewState extends State<ReviewView> {
   }
 
   Future<void> _editManually() async {
-    // Chuyển thẳng sang màn hình nhập tay, giữ nguyên bản nháp hiện tại
-    // (cạnh "edit fields / low OCR confidence" trong Figure 9).
+    // Go straight to the manual entry screen, keeping the current draft
+    // (the "edit fields / low OCR confidence" edge in Figure 9).
     context.read<TransactionViewModel>().correctField(
           merchant: _merchant.text.trim(),
           amount: double.tryParse(_amount.text.replaceAll(',', '')) ?? 0,
@@ -213,7 +213,7 @@ class _ReviewViewState extends State<ReviewView> {
   }
 }
 
-/// Nhãn trường kèm chấm màu thể hiện độ tin cậy OCR của chính trường đó.
+/// Field label with a coloured dot showing that field's own OCR confidence.
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text, {this.confidence});
 

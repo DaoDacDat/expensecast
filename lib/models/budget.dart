@@ -1,4 +1,4 @@
-/// Chu kỳ ngân sách - enum BudgetPeriod trong class diagram.
+/// Budget period - the BudgetPeriod enum in the class diagram.
 enum BudgetPeriod {
   weekly,
   fortnightly,

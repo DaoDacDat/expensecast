@@ -7,10 +7,10 @@ class ForecastResult {
   /// predictedSpend / budgetLimit
   final double riskRatio;
 
-  /// Chuỗi điểm dùng để vẽ đường "actual" trên biểu đồ Insights.
+  /// Data points used to draw the "actual" line on the Insights chart.
   final List<double> actualSeries;
 
-  /// Chuỗi điểm dự báo tiếp nối actualSeries.
+  /// Forecast data points continuing from actualSeries.
   final List<double> predictedSeries;
 
   const ForecastResult({

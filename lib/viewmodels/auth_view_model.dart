@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-/// ViewModel cho màn hình Login / Register (mockup 1).
+/// ViewModel for the Login / Register screen (mockup 1).
 ///
-/// Milestone 1 chưa gọi server thật: chỉ kiểm tra định dạng đầu vào và
-/// giả lập độ trễ mạng để luồng điều hướng hoạt động đầy đủ.
+/// Milestone 1 does not call a real server yet: it only validates input format and
+/// simulates network latency so the navigation flow works end to end.
 class AuthViewModel extends ChangeNotifier {
   bool _isBusy = false;
   bool _isSignedIn = false;

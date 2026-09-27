@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Quét hoá đơn (cunning_document_scanner). Chọn ảnh có sẵn đi qua
-         system photo picker của scanner nên không cần quyền đọc bộ nhớ. -->
+    <!-- Receipt scanning (cunning_document_scanner). Picking an existing image goes through
+         the scanner's system photo picker, so no storage read permission is needed. -->
     <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />

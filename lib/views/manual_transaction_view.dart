@@ -8,14 +8,14 @@ import '../models/transaction.dart';
 import '../viewmodels/transaction_view_model.dart';
 import '../widgets/category_picker.dart';
 
-/// Màn hình Manual Transaction (Figure 9).
+/// Manual Transaction screen (Figure 9).
 ///
-/// Dùng cho cả hai luồng: thêm mới thủ công từ Home, và sửa tiếp khi OCR
-/// cho kết quả kém tin cậy từ màn hình Review.
+/// Used for both flows: adding manually from Home, and continuing to edit when OCR
+/// returns low-confidence results from the Review screen.
 class ManualTransactionView extends StatefulWidget {
   const ManualTransactionView({super.key, this.existing});
 
-  /// Khi khác null, màn hình ở chế độ chỉnh sửa một giao dịch đã lưu.
+  /// When non-null, the screen is in edit mode for a saved transaction.
   final Transaction? existing;
 
   @override

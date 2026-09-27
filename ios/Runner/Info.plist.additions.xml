@@ -1,6 +1,6 @@
 <!--
-  Thêm các khoá dưới đây vào ios/Runner/Info.plist (bên trong <dict> gốc).
-  Thiếu chúng thì iOS sẽ chấm dứt app ngay khi mở camera hoặc thư viện ảnh.
+  Add the keys below to ios/Runner/Info.plist (inside the root <dict>).
+  Without them, iOS will terminate the app as soon as the camera or photo library is opened.
 -->
 
 <key>NSCameraUsageDescription</key>

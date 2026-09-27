@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Danh mục chi tiêu cố định của MVP (theo mockup 5 - Budgets).
+/// Fixed spending categories for the MVP (per mockup 5 - Budgets).
 class Categories {
   static const groceries = 'Groceries';
   static const transport = 'Transport';

@@ -9,8 +9,8 @@ import 'home_view.dart';
 import 'insights_view.dart';
 import 'more_view.dart';
 
-/// Tab host ứng với khung nét đứt "Bottom navigation bar" trong Figure 9:
-/// mọi đích đến bên trong khung này cách nhau đúng một lần chạm.
+/// Tab host corresponding to the dashed "Bottom navigation bar" frame in Figure 9:
+/// every destination inside this frame is exactly one tap apart.
 class ShellView extends StatefulWidget {
   const ShellView({super.key, this.initialIndex = 0});
 
@@ -26,7 +26,7 @@ class _ShellViewState extends State<ShellView> {
   @override
   void initState() {
     super.initState();
-    // Tính dự báo lần đầu sau khi frame đầu tiên được dựng.
+    // Compute the first forecast after the first frame has been built.
     WidgetsBinding.instance.addPostFrameCallback((_) => _refreshForecast());
   }
 

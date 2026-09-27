@@ -2,9 +2,9 @@ import '../models/budget.dart';
 import '../models/forecast_result.dart';
 import '../models/transaction.dart';
 
-/// IForecastService (Figure 8). Sprint 3 sẽ có cài đặt ForecastEngine
-/// chạy TensorFlow Lite; ở đây dùng bản heuristic để UI có số liệu thật
-/// từ dữ liệu giao dịch hiện có.
+/// IForecastService (Figure 8). Sprint 3 will add a ForecastEngine implementation
+/// running TensorFlow Lite; a heuristic version is used here so the UI shows real
+/// numbers from the existing transaction data.
 abstract class ForecastService {
   Future<List<ForecastResult>> predict(
     List<Transaction> transactions,
@@ -12,8 +12,8 @@ abstract class ForecastService {
   );
 }
 
-/// Bản dự báo tuyến tính đơn giản: lấy tốc độ chi tiêu trung bình mỗi ngày
-/// trong 30 ngày gần nhất rồi ngoại suy cho 30 ngày tới.
+/// Simple linear forecast: takes the average daily spending rate
+/// over the last 30 days and extrapolates it over the next 30 days.
 class HeuristicForecastService implements ForecastService {
   @override
   Future<List<ForecastResult>> predict(
@@ -53,7 +53,7 @@ class HeuristicForecastService implements ForecastService {
     return results;
   }
 
-  /// Chi tiêu cộng dồn theo từng mốc thời gian, dùng vẽ đường liền "actual".
+  /// Cumulative spending at each time point, used to draw the solid "actual" line.
   List<double> _cumulativeSeries(
     List<Transaction> txs,
     DateTime now, {
@@ -71,7 +71,7 @@ class HeuristicForecastService implements ForecastService {
     return buckets.map((v) => running += v).toList();
   }
 
-  /// Đường đứt nét "predicted" nối tiếp từ mức chi tiêu hiện tại.
+  /// Dashed "predicted" line continuing from the current spending level.
   List<double> _projection(double spent, double predicted,
       {required int points}) {
     final step = (predicted - spent) / points;

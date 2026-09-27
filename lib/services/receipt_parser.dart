@@ -4,24 +4,24 @@ import 'dart:ui' show Rect;
 import '../core/categories.dart';
 import '../models/ocr_result.dart';
 
-/// Một dòng chữ do bộ nhận dạng trả về, kèm vị trí trên ảnh.
+/// A line of text returned by the recogniser, with its position in the image.
 ///
-/// Tách khỏi kiểu `TextLine` của ML Kit để [ReceiptParser] là Dart thuần,
-/// test được mà không cần native plugin.
+/// Decoupled from ML Kit's `TextLine` type so [ReceiptParser] is pure Dart,
+/// testable without the native plugin.
 class ReceiptLine {
   final String text;
   final Rect box;
 
-  /// Độ tin cậy của bộ nhận dạng cho dòng này (ML Kit có thể trả null).
+  /// Recogniser confidence for this line (ML Kit may return null).
   final double? confidence;
 
   const ReceiptLine(this.text, this.box, {this.confidence});
 }
 
-/// Các dòng nằm cùng một hàng ngang trên hoá đơn, đã nối từ trái sang phải.
+/// Lines lying on the same horizontal row of the receipt, joined left to right.
 ///
-/// ML Kit hay tách "TOTAL" và "$54.20" thành hai block riêng vì chúng ở hai
-/// cột, nên phải ghép lại theo toạ độ thì mới đọc được cặp nhãn - giá trị.
+/// ML Kit often splits "TOTAL" and "$54.20" into two separate blocks because they are in
+/// different columns, so they must be joined by coordinates to read label - value pairs.
 class _Row {
   _Row(ReceiptLine first) : lines = [first];
 
@@ -41,7 +41,7 @@ class _Row {
 
   double get confidence {
     final known = lines.map((l) => l.confidence).whereType<double>();
-    // iOS không trả confidence từng dòng; coi như nhận dạng tốt.
+    // iOS does not return per-line confidence; assume recognition is good.
     if (known.isEmpty) return _defaultLineConfidence;
     return known.reduce(min);
   }
@@ -49,10 +49,10 @@ class _Row {
 
 const _defaultLineConfidence = 0.95;
 
-/// Chuyển văn bản OCR thô thành các trường của giao dịch bằng heuristic.
+/// Converts raw OCR text into transaction fields using heuristics.
 ///
-/// Mỗi trường mang confidence = (độ chắc của heuristic) x (confidence OCR của
-/// dòng chứa nó), để màn hình Review chỉ đúng trường cần người dùng kiểm tra.
+/// Each field carries confidence = (heuristic certainty) x (OCR confidence of the
+/// line containing it), so the Review screen points at exactly the field the user should check.
 class ReceiptParser {
   ReceiptParser({DateTime Function()? clock}) : _clock = clock ?? DateTime.now;
 
@@ -100,7 +100,7 @@ class ReceiptParser {
   );
 
   OcrField<String> _merchant(List<_Row> rows) {
-    // Tên cửa hàng gần như luôn nằm trong vài hàng đầu tiên.
+    // The merchant name is almost always in the first few rows.
     for (final (i, row) in rows.take(6).indexed) {
       final text = row.text.trim();
       final letters = RegExp(r'[A-Za-z]').allMatches(text).length;
@@ -127,13 +127,13 @@ class ReceiptParser {
 
   // ----------------------------------------------------------------- amount
 
-  /// Số tiền có đúng hai chữ số thập phân: 54.20, $1,234.50, 54,20.
-  /// Không bắt đầu/kết thúc giữa một dãy số khác (vd. ngày 18.08.26).
+  /// Amounts with exactly two decimal places: 54.20, $1,234.50, 54,20.
+  /// Must not start/end in the middle of another number (e.g. the date 18.08.26).
   static final _money = RegExp(
     r'(?<![\d.,])(\d{1,3}(?:,\d{3})+|\d+)[.,](\d{2})(?![.,]?\d)',
   );
 
-  /// Nhãn tổng tiền, xếp theo độ ưu tiên giảm dần.
+  /// Total labels, in descending order of priority.
   static const _totalKeywords = <String>[
     'grand total',
     'total due',
@@ -147,8 +147,8 @@ class ReceiptParser {
     'card',
   ];
 
-  /// Hàng có số tiền nhưng không phải tổng phải trả. "TOTAL INCL GST 54.20"
-  /// vẫn là tổng, còn "GST 7.07" hay "Total includes GST 7.07" thì không.
+  /// Rows with an amount that is not the amount due. "TOTAL INCL GST 54.20"
+  /// is still the total, but "GST 7.07" or "Total includes GST 7.07" is not.
   static final _notTotal = RegExp(
     r'sub\s*-?\s*total|(?<!incl\.?\s*|including\s*)gst|\btax\b|discount|'
     r'saving|saved|change|rounding|cash|tendered|\bqty\b|items?\b|points',
@@ -164,7 +164,7 @@ class ReceiptParser {
       final rank = _totalKeywords.indexWhere(lower.contains);
       if (rank < 0 || rank > bestRank) continue;
 
-      // Số tiền cùng hàng, hoặc ở hàng ngay dưới nếu hàng đó chỉ có số.
+      // Amount on the same row, or on the row just below if that row only has a number.
       var value = _lastMoney(row.text);
       var conf = row.confidence;
       if (value == null && i + 1 < rows.length) {
@@ -178,7 +178,7 @@ class ReceiptParser {
 
       final score = rank <= 4 ? 0.95 : 0.8;
       final candidate = OcrField(value, score * conf);
-      // Cùng độ ưu tiên thì lấy số lớn hơn (TOTAL thường >= các dòng khác).
+      // Same priority: take the larger amount (TOTAL is usually >= other lines).
       if (rank < bestRank || best == null || value > best.value) {
         best = candidate;
         bestRank = rank;
@@ -186,7 +186,7 @@ class ReceiptParser {
     }
     if (best != null) return best;
 
-    // Không thấy nhãn tổng: lấy số tiền lớn nhất, nhưng kém tự tin.
+    // No total label found: take the largest amount, but with low confidence.
     OcrField<double>? largest;
     for (final row in rows) {
       if (_notTotal.hasMatch(row.lower)) continue;
@@ -243,7 +243,7 @@ class ReceiptParser {
       final found = _findDate(row.lower);
       if (found == null) continue;
       final (date, score) = found;
-      // Hàng có chữ "date" đáng tin hơn các ngày khác (vd. hạn đổi trả).
+      // A row containing "date" is more trustworthy than other dates (e.g. return deadline).
       final boost = row.lower.contains('date') ? 1.0 : 0.95;
       final candidate = OcrField(date, score * boost * row.confidence);
       if (best == null || candidate.confidence > best.confidence) {
@@ -268,8 +268,8 @@ class ReceiptParser {
     }
     for (final m in _numericDate.allMatches(text)) {
       final a = _int(m, 1), b = _int(m, 2), y = _year(m, 3);
-      // Mặc định ngày trước tháng (định dạng NZ); chỉ đọc kiểu Mỹ khi số
-      // thứ hai không thể là tháng (vd. 09/13/2026).
+      // Default to day before month (NZ format); only read US style when the second
+      // number cannot be a month (e.g. 09/13/2026).
       if (b <= 12) {
         final d = _validDate(y, b, a);
         if (d != null) return (d, a <= 12 && a != b ? 0.8 : 0.9);
@@ -288,8 +288,8 @@ class ReceiptParser {
     return y < 100 ? 2000 + y : y;
   }
 
-  /// Chỉ nhận ngày có thật, không ở tương lai và không quá 5 năm trước
-  /// (cũng giữ ngày trong khoảng mà date picker ở màn Review cho phép).
+  /// Only accept real dates, not in the future and not more than 5 years ago
+  /// (also keeps the date within the range allowed by the Review screen's date picker).
   DateTime? _validDate(int year, int month, int day) {
     if (month < 1 || month > 12 || day < 1 || day > 31) return null;
     final d = DateTime(year, month, day);

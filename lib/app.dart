@@ -10,10 +10,10 @@ import 'viewmodels/forecast_view_model.dart';
 import 'viewmodels/transaction_view_model.dart';
 import 'views/login_view.dart';
 
-/// Gốc ứng dụng: cắm các ViewModel (MVVM) vào cây widget bằng Provider.
+/// App root: plugs the ViewModels (MVVM) into the widget tree via Provider.
 ///
-/// Các View chỉ nhìn thấy ViewModel; ViewModel chỉ nhìn thấy interface của
-/// service - đúng hướng phụ thuộc trong Figure 8.
+/// Views only see ViewModels; ViewModels only see service interfaces
+/// - the dependency direction shown in Figure 8.
 class ExpenseCastApp extends StatelessWidget {
   const ExpenseCastApp({super.key});
 

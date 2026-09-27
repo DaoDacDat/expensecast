@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../core/formatters.dart';
 
-/// Biểu đồ quỹ đạo chi tiêu ở màn hình Insights (mockup 6):
-/// đường liền = đã chi thực tế, đường đứt = dự báo, đường chấm ngang = hạn mức.
+/// Spending trajectory chart on the Insights screen (mockup 6):
+/// solid line = actual spending, dashed line = forecast, horizontal dotted line = limit.
 class ForecastChart extends StatelessWidget {
   const ForecastChart({
     super.key,
@@ -176,7 +176,7 @@ class _ForecastPainter extends CustomPainter {
     double dy(double value) =>
         topPad + chartH - (value / safeMax) * chartH;
 
-    // Trục
+    // Axes
     final axisPaint = Paint()
       ..color = axisColor
       ..strokeWidth = 1;
@@ -186,7 +186,7 @@ class _ForecastPainter extends CustomPainter {
       axisPaint,
     );
 
-    // Đường hạn mức (chấm ngang)
+    // Limit line (horizontal dotted)
     final budgetPaint = Paint()
       ..color = budgetColor
       ..strokeWidth = 1.4;
@@ -201,7 +201,7 @@ class _ForecastPainter extends CustomPainter {
       bx += 8;
     }
 
-    // Đường thực tế (liền)
+    // Actual line (solid)
     final actualPaint = Paint()
       ..color = actualColor
       ..strokeWidth = 2.6
@@ -220,7 +220,7 @@ class _ForecastPainter extends CustomPainter {
     }
     canvas.drawPath(actualPath, actualPaint);
 
-    // Vùng tô nhạt dưới đường thực tế
+    // Light fill under the actual line
     if (actual.isNotEmpty) {
       final fill = Path.from(actualPath)
         ..lineTo(dx(actual.length - 1), topPad + chartH)
@@ -232,7 +232,7 @@ class _ForecastPainter extends CustomPainter {
       );
     }
 
-    // Đường dự báo (đứt nét), nối tiếp điểm cuối của actual
+    // Forecast line (dashed), continuing from the last actual point
     if (predicted.isNotEmpty && actual.isNotEmpty) {
       final points = <Offset>[
         Offset(dx(actual.length - 1), dy(actual.last)),
@@ -249,7 +249,7 @@ class _ForecastPainter extends CustomPainter {
         _dashedLine(canvas, points[i], points[i + 1], predictedPaint);
       }
 
-      // Chấm tròn ở điểm dự báo cuối cùng
+      // Dot at the last forecast point
       canvas.drawCircle(
         points.last,
         4,
@@ -257,7 +257,7 @@ class _ForecastPainter extends CustomPainter {
       );
     }
 
-    // Vạch phân cách giữa actual và predicted
+    // Divider between actual and predicted
     if (actual.isNotEmpty && predicted.isNotEmpty) {
       final sepX = dx(actual.length - 1);
       final sepPaint = Paint()

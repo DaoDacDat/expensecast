@@ -1,7 +1,7 @@
-/// Một trường được OCR trích xuất, kèm độ tin cậy riêng của trường đó.
+/// A field extracted by OCR, with its own per-field confidence.
 ///
-/// Mockup số 4 trong báo cáo nêu rõ: màn hình Review phải chỉ ra *trường nào*
-/// máy nhận dạng kém tự tin nhất, chứ không chỉ một điểm confidence tổng.
+/// Mockup 4 in the report states that the Review screen must point out *which field*
+/// the recogniser is least confident about, not just an overall confidence score.
 class OcrField<T> {
   final T value;
   final double confidence;
@@ -11,7 +11,7 @@ class OcrField<T> {
   bool get isLowConfidence => confidence < 0.75;
 }
 
-/// Kết quả OCR trả về từ MlKitOcrService.extract().
+/// OCR result returned by MlKitOcrService.extract().
 class OcrResult {
   final OcrField<String> merchant;
   final OcrField<double> amount;
@@ -27,7 +27,7 @@ class OcrResult {
     required this.imagePath,
   });
 
-  /// Trường có độ tin cậy thấp nhất - dùng để hiện cảnh báo
+  /// The field with the lowest confidence - used to show a warning
   /// "Low confidence on <field> — please check".
   String? get weakestFieldName {
     final entries = <String, double>{

@@ -4,7 +4,7 @@ import '../core/categories.dart';
 import '../core/formatters.dart';
 import '../core/theme.dart';
 
-/// Thanh tiến độ ngân sách theo danh mục (mockup 5 - Budgets).
+/// Per-category budget progress bar (mockup 5 - Budgets).
 class BudgetProgressTile extends StatelessWidget {
   const BudgetProgressTile({
     super.key,

@@ -9,7 +9,7 @@ import '../viewmodels/forecast_view_model.dart';
 import '../viewmodels/transaction_view_model.dart';
 import '../widgets/budget_progress_tile.dart';
 
-/// Mockup 5: Budgets - đặt hạn mức theo danh mục và chu kỳ.
+/// Mockup 5: Budgets - set limits per category and period.
 class BudgetView extends StatelessWidget {
   const BudgetView({super.key});
 

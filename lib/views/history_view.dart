@@ -9,7 +9,7 @@ import '../viewmodels/transaction_view_model.dart';
 import '../widgets/transaction_tile.dart';
 import 'manual_transaction_view.dart';
 
-/// History & Export (mục 1.2.1: xem lịch sử và xuất CSV).
+/// History & Export (section 1.2.1: view history and export CSV).
 class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
 

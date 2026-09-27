@@ -7,27 +7,27 @@ import '../core/categories.dart';
 import '../models/ocr_result.dart';
 import 'receipt_parser.dart';
 
-/// Hợp đồng của lớp OCR (IReceiptCapture trong component diagram).
+/// Contract for the OCR layer (IReceiptCapture in the component diagram).
 ///
-/// UI chỉ phụ thuộc vào interface này, nên đổi giữa [MlKitOcrService] và
-/// [StubOcrService] không phải sửa View hay ViewModel.
+/// The UI depends only on this interface, so switching between [MlKitOcrService] and
+/// [StubOcrService] requires no changes to Views or ViewModels.
 abstract class OcrService {
   Future<OcrResult> extract(File image);
 }
 
-/// Nhận dạng chữ on-device bằng ML Kit (ảnh không rời khỏi thiết bị).
+/// On-device text recognition with ML Kit (the image never leaves the device).
 ///
-/// Ảnh đầu vào nên là ảnh đã được `cunning_document_scanner` cắt và nắn
-/// phối cảnh, để các dòng chữ thẳng hàng - [ReceiptParser] dựa vào toạ độ
-/// dòng để ghép nhãn "TOTAL" với số tiền cùng hàng.
+/// The input image should already be cropped and perspective-corrected by
+/// `cunning_document_scanner` so text lines are aligned - [ReceiptParser] relies on line
+/// coordinates to pair the "TOTAL" label with the amount on the same row.
 class MlKitOcrService implements OcrService {
   MlKitOcrService({ReceiptParser? parser})
       : _parser = parser ?? ReceiptParser();
 
   final ReceiptParser _parser;
 
-  /// Model Latin đủ cho hoá đơn tiếng Anh; tạo một lần và dùng suốt vòng đời
-  /// app vì TransactionViewModel cũng sống suốt vòng đời app.
+  /// The Latin model is enough for English receipts; create it once and keep it for the
+  /// app's lifetime since TransactionViewModel also lives for the app's lifetime.
   final TextRecognizer _recognizer =
       TextRecognizer(script: TextRecognitionScript.latin);
 
@@ -50,11 +50,11 @@ class MlKitOcrService implements OcrService {
   Future<void> close() => _recognizer.close();
 }
 
-/// Cài đặt giả lập, dùng cho test và máy không chạy được ML Kit
+/// Fake implementation, used for tests and devices that cannot run ML Kit
 /// (vd. simulator).
 ///
-/// Trả về dữ liệu có cấu trúc giống hệt kết quả ML Kit thật (kèm confidence
-/// từng trường) để màn hình Review hoạt động đầy đủ mà chưa cần native plugin.
+/// Returns data with exactly the same structure as real ML Kit output (with per-field
+/// confidence) so the Review screen works fully without the native plugin.
 class StubOcrService implements OcrService {
   StubOcrService({Random? random}) : _random = random ?? Random();
 
@@ -90,13 +90,13 @@ class StubOcrService implements OcrService {
 
   @override
   Future<OcrResult> extract(File image) async {
-    // Mô phỏng thời gian chạy inference on-device (yêu cầu < 2s, mục 1.2.1).
+    // Simulate on-device inference time (requirement < 2s, section 1.2.1).
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
     final s = _samples[_random.nextInt(_samples.length)];
 
-    // Một trường ngẫu nhiên sẽ có confidence thấp, để minh hoạ luồng sửa lỗi
-    // được mô tả ở mục 5.4 của báo cáo.
+    // One random field gets low confidence, to demonstrate the correction flow
+    // described in section 5.4 of the report.
     final weakIndex = _random.nextInt(4);
     double conf(int index) => index == weakIndex
         ? 0.55 + _random.nextDouble() * 0.15

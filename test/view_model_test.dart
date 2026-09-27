@@ -11,8 +11,8 @@ import 'package:expensecast/viewmodels/forecast_view_model.dart';
 import 'package:expensecast/viewmodels/transaction_view_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Stub OCR có kết quả cố định - minh hoạ điểm testability nêu ở mục 7.3:
-/// ViewModel phụ thuộc interface nên thay được cài đặt thật khi test.
+/// OCR stub with a fixed result - illustrates the testability point from section 7.3:
+/// the ViewModel depends on an interface, so the real implementation can be swapped in tests.
 class _FixedOcrService implements OcrService {
   @override
   Future<OcrResult> extract(File image) async => OcrResult(

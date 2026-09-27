@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../core/categories.dart';
 import '../models/budget.dart';
 
-/// BudgetViewModel (Figure 8) - quản lý hạn mức theo danh mục và chu kỳ.
+/// BudgetViewModel (Figure 8) - manages limits per category and period.
 class BudgetViewModel extends ChangeNotifier {
   BudgetViewModel() {
     _seed();
@@ -49,7 +49,7 @@ class BudgetViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Các danh mục chưa có ngân sách - dùng cho nút "+ Add category budget".
+  /// Categories without a budget yet - used by the "+ Add category budget" button.
   List<String> get availableCategories => Categories.all
       .where((c) => _budgets.every((b) => b.category != c))
       .toList();

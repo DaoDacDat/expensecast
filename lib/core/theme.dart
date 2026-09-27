@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Bảng màu và theme chung. Giữ tông xanh lá trầm giống mockup
-/// (nút "Sign in" / "Save transaction" nền xanh nhạt).
+/// Shared colour palette and theme. Keeps the muted green tone of the mockup
+/// (light green background on the "Sign in" / "Save transaction" buttons).
 class AppTheme {
   static const seed = Color(0xFF2E7D5B);
   static const warning = Color(0xFFB4721E);

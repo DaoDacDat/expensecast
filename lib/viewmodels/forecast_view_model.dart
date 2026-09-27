@@ -5,8 +5,8 @@ import '../models/forecast_result.dart';
 import '../models/transaction.dart';
 import '../services/forecast_service.dart';
 
-/// ForecastViewModel (Figure 8) - chỉ phụ thuộc vào interface
-/// [ForecastService] nên có thể thay bằng stub khi unit test (mục 7.3).
+/// ForecastViewModel (Figure 8) - depends only on the [ForecastService]
+/// interface so it can be replaced with a stub in unit tests (section 7.3).
 class ForecastViewModel extends ChangeNotifier {
   ForecastViewModel({required ForecastService service}) : _service = service;
 

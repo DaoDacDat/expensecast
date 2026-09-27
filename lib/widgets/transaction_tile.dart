@@ -4,7 +4,7 @@ import '../core/categories.dart';
 import '../core/formatters.dart';
 import '../models/transaction.dart';
 
-/// Một dòng giao dịch trong "Recent transactions" (mockup 2) và History.
+/// A transaction row in "Recent transactions" (mockup 2) and History.
 class TransactionTile extends StatelessWidget {
   const TransactionTile({
     super.key,

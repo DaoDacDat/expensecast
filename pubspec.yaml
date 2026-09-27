@@ -4,8 +4,8 @@ publish_to: "none"
 version: 0.1.0+1
 
 environment:
-  # Dart 3.6 đi kèm Flutter 3.27 - phiên bản tối thiểu có Color.withValues()
-  # và CardThemeData được dùng trong lib/core/theme.dart.
+  # Dart 3.6 ships with Flutter 3.27 - the minimum version that has Color.withValues()
+  # and CardThemeData, used in lib/core/theme.dart.
   sdk: ">=3.6.0 <4.0.0"
 
 dependencies:
@@ -16,7 +16,7 @@ dependencies:
   # State management (MVVM - ViewModel layer)
   provider: ^6.1.2
 
-  # Receipt capture: quét + nắn phối cảnh, rồi OCR on-device
+  # Receipt capture: scan + perspective correction, then on-device OCR
   cunning_document_scanner: ^3.0.3
   google_mlkit_text_recognition: ^0.16.0
   path_provider: ^2.1.4

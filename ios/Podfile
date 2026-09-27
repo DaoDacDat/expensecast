@@ -1,6 +1,6 @@
 # ExpenseCast - ios/Podfile
-# Đặt deployment target 15.5 cho cả app lẫn toàn bộ Pods
-# (google_mlkit_text_recognition yêu cầu tối thiểu iOS 15.5).
+# Set deployment target 15.5 for both the app and all Pods
+# (google_mlkit_text_recognition requires at least iOS 15.5).
 
 platform :ios, '15.5'
 
@@ -42,7 +42,7 @@ target 'Runner' do
 end
 
 post_install do |installer|
-  # ML Kit không có bản 32-bit.
+  # ML Kit has no 32-bit build.
   installer.pods_project.build_configurations.each do |config|
     config.build_settings['EXCLUDED_ARCHS[sdk=*]'] = 'armv7'
   end
@@ -51,8 +51,8 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
-      # Ép mọi pod lên 15.5 - đây là dòng chữa lỗi "supported deployment
-      # target versions is 15.0 to 27.0.x", và là mức tối thiểu của ML Kit.
+      # Force every pod to 15.5 - this is the line that fixes the "supported deployment
+      # target versions is 15.0 to 27.0.x" error, and it is ML Kit's minimum.
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.5'
     end
   end

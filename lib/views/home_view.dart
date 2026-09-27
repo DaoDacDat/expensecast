@@ -11,7 +11,7 @@ import 'capture_view.dart';
 import 'history_view.dart';
 import 'manual_transaction_view.dart';
 
-/// Mockup 2: Home - số dư chi tiêu, tiến độ ngân sách, giao dịch gần đây.
+/// Mockup 2: Home - spending balance, budget progress, recent transactions.
 class HomeView extends StatelessWidget {
   const HomeView({super.key, this.onSeeInsights});
 

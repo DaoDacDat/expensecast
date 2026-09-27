@@ -4,8 +4,8 @@ import 'package:expensecast/core/categories.dart';
 import 'package:expensecast/services/receipt_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Dựng một dòng OCR ở hàng [row], cột [x] - giống cách ML Kit tách
-/// nhãn bên trái và số tiền bên phải thành hai block riêng.
+/// Builds an OCR line at row [row], column [x] - mimicking how ML Kit splits
+/// the label on the left and the amount on the right into two separate blocks.
 ReceiptLine line(String text, int row, {double x = 20, double? conf}) =>
     ReceiptLine(
       text,

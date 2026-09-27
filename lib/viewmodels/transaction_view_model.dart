@@ -9,8 +9,8 @@ import '../services/ocr_service.dart';
 
 /// TransactionViewModel (Figure 8).
 ///
-/// Giữ danh sách giao dịch, bản nháp đang chờ xác nhận sau khi OCR,
-/// và các thao tác sửa từng trường trên màn hình Review.
+/// Holds the transaction list, the draft awaiting confirmation after OCR,
+/// and the per-field edit operations on the Review screen.
 class TransactionViewModel extends ChangeNotifier {
   TransactionViewModel({required OcrService ocrService})
       : _ocrService = ocrService {
@@ -25,7 +25,7 @@ class TransactionViewModel extends ChangeNotifier {
   bool _isBusy = false;
   String? _error;
 
-  /// Danh sách đã sắp xếp mới nhất trước (bản sao, không sửa được từ View).
+  /// List sorted newest first (a copy, cannot be modified from the View).
   List<Transaction> get transactions {
     final sorted = List<Transaction>.from(_transactions)
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -38,7 +38,7 @@ class TransactionViewModel extends ChangeNotifier {
 
   List<Transaction> get recent => transactions.take(5).toList();
 
-  /// Tổng chi tiêu trong tháng hiện tại (số lớn trên màn Home).
+  /// Total spending in the current month (the big number on the Home screen).
   double get spentThisMonth {
     final now = DateTime.now();
     return _transactions
@@ -58,10 +58,10 @@ class TransactionViewModel extends ChangeNotifier {
 
   // ---------------------------------------------------------------- OCR flow
 
-  /// Bước 1.1 trong sequence diagram: addFromReceipt(image).
+  /// Step 1.1 in the sequence diagram: addFromReceipt(image).
   ///
-  /// Chạy OCR rồi tạo bản nháp; bản nháp CHƯA được lưu cho tới khi người dùng
-  /// bấm "Save transaction" ở màn hình Review.
+  /// Runs OCR and then creates a draft; the draft is NOT saved until the user
+  /// taps "Save transaction" on the Review screen.
   Future<bool> addFromReceipt(File image) async {
     _isBusy = true;
     _error = null;
@@ -89,7 +89,7 @@ class TransactionViewModel extends ChangeNotifier {
     }
   }
 
-  /// Bắt đầu một bản nháp trống cho luồng nhập tay.
+  /// Starts an empty draft for the manual entry flow.
   void startManualDraft() {
     _lastOcr = null;
     _draft = Transaction(
@@ -103,7 +103,7 @@ class TransactionViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// correctField(f, v) - người dùng sửa một trường trên màn hình Review.
+  /// correctField(f, v) - the user edits a field on the Review screen.
   void correctField({
     String? merchant,
     double? amount,
@@ -123,7 +123,7 @@ class TransactionViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// commitDraft() - bước 3.1 trong sequence diagram.
+  /// commitDraft() - step 3.1 in the sequence diagram.
   bool commitDraft() {
     final d = _draft;
     if (d == null) return false;
@@ -166,8 +166,8 @@ class TransactionViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Xuất CSV (mục History & Export). Trả về chuỗi để màn hình hiển thị
-  /// hoặc ghi ra tệp ở giai đoạn sau.
+  /// Export CSV (History & Export section). Returns a string for the screen to display
+  /// or to write to a file at a later stage.
   String toCsv() {
     final buffer = StringBuffer('date,merchant,category,amount,source\n');
     for (final t in transactions) {

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../core/categories.dart';
 
-/// Ô chọn danh mục dùng chung cho màn hình Review và Manual Entry.
+/// Category picker shared by the Review and Manual Entry screens.
 ///
-/// Dùng bottom sheet thay cho DropdownButtonFormField để vùng chạm lớn hơn
-/// (yêu cầu usability ở mục 1.2.1) và không phụ thuộc vào API dropdown vốn
-/// thay đổi giữa các phiên bản Flutter.
+/// Uses a bottom sheet instead of DropdownButtonFormField for a larger touch target
+/// (usability requirement in section 1.2.1) and to avoid depending on the dropdown API, which
+/// changes between Flutter versions.
 class CategoryPicker extends StatelessWidget {
   const CategoryPicker({
     super.key,
@@ -18,7 +18,7 @@ class CategoryPicker extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  /// Tô nền nhấn khi đây là gợi ý từ OCR (mockup 4).
+  /// Highlight the background when this is a suggestion from OCR (mockup 4).
   final bool highlighted;
 
   Future<void> _open(BuildContext context) async {

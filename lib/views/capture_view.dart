@@ -9,10 +9,10 @@ import 'review_view.dart';
 
 /// Mockup 3: Receipt Capture.
 ///
-/// Mở trình quét tài liệu native (ML Kit trên Android, VisionKit trên iOS):
-/// nó tự dò mép hoá đơn, cắt và nắn phối cảnh, rồi trả về ảnh đã phẳng.
-/// Ảnh đó đi thẳng vào OCR on-device và sang màn hình Review - không rời
-/// khỏi thiết bị.
+/// Opens the native document scanner (ML Kit on Android, VisionKit on iOS):
+/// it detects the receipt edges, crops and corrects perspective, then returns a flattened image.
+/// That image goes straight into on-device OCR and on to the Review screen - it never
+/// leaves the device.
 class CaptureView extends StatefulWidget {
   const CaptureView({super.key});
 
@@ -30,7 +30,7 @@ class _CaptureViewState extends State<CaptureView> {
   @override
   void initState() {
     super.initState();
-    // Mở scanner ngay khi vào màn hình, sau frame đầu để có context hợp lệ.
+    // Open the scanner as soon as the screen appears, after the first frame so the context is valid.
     WidgetsBinding.instance.addPostFrameCallback((_) => _scan());
   }
 
@@ -48,7 +48,7 @@ class _CaptureViewState extends State<CaptureView> {
       pages = await CunningDocumentScanner.getPictures(
         noOfPages: 1,
         scannerSource: source,
-        // PNG mặc định rất nặng; JPEG 90% vẫn đủ nét cho OCR.
+        // Default PNG is very heavy; JPEG at 90% is still sharp enough for OCR.
         iosScannerOptions: IosScannerOptions(
           imageFormat: IosImageFormat.jpg,
           jpgCompressionQuality: 0.9,
@@ -70,14 +70,14 @@ class _CaptureViewState extends State<CaptureView> {
 
     if (!mounted) return;
     if (pages == null) {
-      // Người dùng huỷ trong scanner -> quay lại màn trước.
+      // User cancelled in the scanner -> go back to the previous screen.
       Navigator.of(context).pop(false);
       return;
     }
     await _readAndReview(File(pages.first));
   }
 
-  /// Bước 1.1 -> 2 trong sequence diagram: OCR xong thì mở màn hình Review.
+  /// Step 1.1 -> 2 in the sequence diagram: once OCR finishes, open the Review screen.
   Future<void> _readAndReview(File image) async {
     setState(() => _phase = _Phase.reading);
 
@@ -104,18 +104,18 @@ class _CaptureViewState extends State<CaptureView> {
     if (saved == true) {
       Navigator.of(context).pop(true);
     } else {
-      // Bỏ bản nháp ở Review = muốn chụp lại.
+      // Discarding the draft on Review = wanting to rescan.
       await _scan();
     }
   }
 
-  /// Giao dịch không lưu ảnh, nên xoá ảnh quét ngay sau khi dùng xong
-  /// (trên Android thư mục của plugin không tự dọn).
+  /// Transactions do not store images, so delete the scanned image right after use
+  /// (on Android the plugin's directory is not cleaned up automatically).
   Future<void> _cleanScans() async {
     try {
       await CunningDocumentScanner.cleanCache();
     } on CunningDocumentScannerException {
-      // Không ảnh hưởng luồng chính; hệ điều hành sẽ dọn sau.
+      // Does not affect the main flow; the OS will clean it up later.
     }
   }
 

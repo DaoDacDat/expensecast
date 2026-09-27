@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-/// Định dạng tiền tệ và ngày dùng chung (mặc định NZD như trong mockup).
+/// Shared currency and date formatting (defaults to NZD as in the mockup).
 class Fmt {
   static final _money = NumberFormat.currency(
     locale: 'en_NZ',

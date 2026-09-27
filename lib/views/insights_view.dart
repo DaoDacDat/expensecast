@@ -10,8 +10,8 @@ import '../widgets/risk_card.dart';
 
 /// Mockup 6: Insights & Forecast.
 ///
-/// Màn hình cố tình hạn chế lượng dữ liệu thô: một biểu đồ quỹ đạo so với
-/// hạn mức, rồi mỗi danh mục thu gọn thành một trạng thái rủi ro (mục 5.4).
+/// This screen deliberately limits raw data: one trajectory chart against
+/// the limit, then each category is condensed into a single risk status (section 5.4).
 class InsightsView extends StatelessWidget {
   const InsightsView({super.key});
 

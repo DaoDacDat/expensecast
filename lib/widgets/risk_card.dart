@@ -4,10 +4,10 @@ import '../core/formatters.dart';
 import '../core/theme.dart';
 import '../models/forecast_result.dart';
 
-/// Thẻ trạng thái rủi ro cho một danh mục (mockup 6).
+/// Risk status card for a single category (mockup 6).
 ///
-/// Theo mục 5.4, mỗi danh mục được thu gọn thành *một trạng thái* thay vì
-/// một tập số liệu, nhằm giảm tải nhận thức cho người dùng.
+/// Per section 5.4, each category is condensed into *a single status* instead of
+/// a set of figures, to reduce the user's cognitive load.
 class RiskCard extends StatelessWidget {
   const RiskCard({super.key, required this.result, this.onTap});
 
