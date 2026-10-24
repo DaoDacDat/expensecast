@@ -43,7 +43,7 @@ class _ManualTransactionViewState extends State<ManualTransactionView> {
           : source.amount.toStringAsFixed(2),
     );
     _date = source?.timestamp ?? DateTime.now();
-    _category = source?.category ?? Categories.groceries;
+    _category = source?.category ?? Categories.food;
   }
 
   @override

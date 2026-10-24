@@ -26,7 +26,8 @@ class _HistoryViewState extends State<HistoryView> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('CSV copied to clipboard (file export comes in Sprint 3).'),
+        content:
+            Text('CSV copied to clipboard (file export comes in Sprint 3).'),
       ),
     );
   }
@@ -62,8 +63,8 @@ class _HistoryViewState extends State<HistoryView> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 4, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                   child: FilterChip(
                     label: const Text('All'),
                     selected: _filter == null,
@@ -72,8 +73,8 @@ class _HistoryViewState extends State<HistoryView> {
                 ),
                 for (final c in Categories.all)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 4, vertical: 10),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
                     child: FilterChip(
                       label: Text(c),
                       selected: _filter == c,

@@ -171,10 +171,8 @@ class _ForecastPainter extends CustomPainter {
     final totalPoints = actual.length + predicted.length;
     if (totalPoints < 2) return;
 
-    double dx(int index) =>
-        leftPad + chartW * (index / (totalPoints - 1));
-    double dy(double value) =>
-        topPad + chartH - (value / safeMax) * chartH;
+    double dx(int index) => leftPad + chartW * (index / (totalPoints - 1));
+    double dy(double value) => topPad + chartH - (value / safeMax) * chartH;
 
     // Axes
     final axisPaint = Paint()

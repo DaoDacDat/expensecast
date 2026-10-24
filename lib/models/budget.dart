@@ -4,6 +4,13 @@ enum BudgetPeriod {
   fortnightly,
   monthly;
 
+  /// Length of the period in days (a month is treated as 30 days).
+  int get days => switch (this) {
+        BudgetPeriod.weekly => 7,
+        BudgetPeriod.fortnightly => 14,
+        BudgetPeriod.monthly => 30,
+      };
+
   String get label => switch (this) {
         BudgetPeriod.weekly => 'Weekly',
         BudgetPeriod.fortnightly => 'Fortnightly',

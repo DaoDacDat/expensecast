@@ -64,7 +64,7 @@ class StubOcrService implements OcrService {
     {
       'merchant': 'New World Victoria St',
       'amount': 54.20,
-      'category': Categories.groceries,
+      'category': Categories.food,
     },
     {
       'merchant': 'Z Energy Symonds St',
@@ -74,17 +74,17 @@ class StubOcrService implements OcrService {
     {
       'merchant': 'Coffee Club',
       'amount': 5.50,
-      'category': Categories.eatingOut,
+      'category': Categories.food,
     },
     {
       'merchant': 'Countdown Metro',
       'amount': 32.75,
-      'category': Categories.groceries,
+      'category': Categories.food,
     },
     {
       'merchant': 'Mercury Energy',
       'amount': 118.40,
-      'category': Categories.utilities,
+      'category': Categories.other,
     },
   ];
 

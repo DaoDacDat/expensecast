@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
@@ -31,6 +32,7 @@ class TransactionViewModel extends ChangeNotifier {
       ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return List.unmodifiable(sorted);
   }
+
   Transaction? get draft => _draft;
   OcrResult? get lastOcr => _lastOcr;
   bool get isBusy => _isBusy;
@@ -42,7 +44,8 @@ class TransactionViewModel extends ChangeNotifier {
   double get spentThisMonth {
     final now = DateTime.now();
     return _transactions
-        .where((t) => t.timestamp.year == now.year && t.timestamp.month == now.month)
+        .where((t) =>
+            t.timestamp.year == now.year && t.timestamp.month == now.month)
         .fold<double>(0, (sum, t) => sum + t.amount);
   }
 
@@ -96,7 +99,7 @@ class TransactionViewModel extends ChangeNotifier {
       id: _newId(),
       merchant: '',
       amount: 0,
-      category: Categories.groceries,
+      category: Categories.food,
       timestamp: DateTime.now(),
       source: TxSource.manualEntry,
     );
@@ -185,113 +188,98 @@ class TransactionViewModel extends ChangeNotifier {
 
   // -------------------------------------------------------------- mock data
 
+  /// Number of days of demo history generated on startup, so the GRU model
+  /// (which needs 60 days) can be run right away.
+  static const seedDays = 60;
+
+  static const _foodMerchants = [
+    'New World',
+    'Countdown Metro',
+    'PAK nSAVE',
+    'Coffee Club',
+    'Bird on a Wire',
+    'Uber Eats',
+    'Subway',
+    'Burger Fuel',
+  ];
+  static const _transportMerchants = [
+    'Z Energy',
+    'BP Connect',
+    'AT HOP top-up',
+    'Uber',
+  ];
+  static const _otherMerchants = [
+    'Kmart',
+    'Warehouse Stationery',
+    'Chemist Warehouse',
+    'Mercury Energy',
+    'Chorus Broadband',
+  ];
+
+  /// Generates random spending for the last [seedDays] days (day 0 = today).
+  /// A fixed seed keeps the demo data the same on every launch.
   void _seedMockData() {
+    final rng = Random(42);
     final now = DateTime.now();
-    _transactions.addAll([
-      Transaction(
-        id: 'tx_seed_1',
-        merchant: 'New World',
-        amount: 54.20,
-        category: Categories.groceries,
-        timestamp: now.subtract(const Duration(hours: 4)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.94,
-      ),
-      Transaction(
-        id: 'tx_seed_2',
-        merchant: 'Z Energy',
-        amount: 61.00,
-        category: Categories.transport,
-        timestamp: now.subtract(const Duration(days: 1, hours: 2)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.91,
-      ),
-      Transaction(
-        id: 'tx_seed_3',
-        merchant: 'Coffee Club',
-        amount: 5.50,
-        category: Categories.eatingOut,
-        timestamp: now.subtract(const Duration(days: 2)),
-        source: TxSource.manualEntry,
-      ),
-      Transaction(
-        id: 'tx_seed_4',
-        merchant: 'Countdown Metro',
-        amount: 118.35,
-        category: Categories.groceries,
-        timestamp: now.subtract(const Duration(days: 4)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.88,
-      ),
-      Transaction(
-        id: 'tx_seed_5',
-        merchant: 'Mercury Energy',
-        amount: 142.10,
-        category: Categories.utilities,
-        timestamp: now.subtract(const Duration(days: 6)),
-        source: TxSource.correctedOcr,
-        ocrConfidence: 0.71,
-      ),
-      Transaction(
-        id: 'tx_seed_6',
-        merchant: 'AT HOP top-up',
-        amount: 40.00,
-        category: Categories.transport,
-        timestamp: now.subtract(const Duration(days: 8)),
-        source: TxSource.manualEntry,
-      ),
-      Transaction(
-        id: 'tx_seed_7',
-        merchant: 'Bird on a Wire',
-        amount: 28.50,
-        category: Categories.eatingOut,
-        timestamp: now.subtract(const Duration(days: 9)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.96,
-      ),
-      Transaction(
-        id: 'tx_seed_8',
-        merchant: 'PAK nSAVE',
-        amount: 96.80,
-        category: Categories.groceries,
-        timestamp: now.subtract(const Duration(days: 12)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.93,
-      ),
-      Transaction(
-        id: 'tx_seed_9',
-        merchant: 'Uber Eats',
-        amount: 34.90,
-        category: Categories.eatingOut,
-        timestamp: now.subtract(const Duration(days: 14)),
-        source: TxSource.manualEntry,
-      ),
-      Transaction(
-        id: 'tx_seed_10',
-        merchant: 'Chorus Broadband',
-        amount: 79.99,
-        category: Categories.utilities,
-        timestamp: now.subtract(const Duration(days: 18)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.90,
-      ),
-      Transaction(
-        id: 'tx_seed_11',
-        merchant: 'Kmart',
-        amount: 24.00,
-        category: Categories.other,
-        timestamp: now.subtract(const Duration(days: 21)),
-        source: TxSource.manualEntry,
-      ),
-      Transaction(
-        id: 'tx_seed_12',
-        merchant: 'BP Connect',
-        amount: 55.00,
-        category: Categories.transport,
-        timestamp: now.subtract(const Duration(days: 24)),
-        source: TxSource.ocrCapture,
-        ocrConfidence: 0.89,
-      ),
-    ]);
+    var n = 0;
+
+    double money(double min, double max) =>
+        double.parse((min + rng.nextDouble() * (max - min)).toStringAsFixed(2));
+
+    void add(int daysAgo, String merchant, double amount, String category) {
+      var at = DateTime(now.year, now.month, now.day - daysAgo,
+          8 + rng.nextInt(12), rng.nextInt(60));
+      if (at.isAfter(now)) {
+        at = now.subtract(Duration(minutes: rng.nextInt(60)));
+      }
+      final scanned = rng.nextBool();
+      _transactions.add(
+        Transaction(
+          id: 'tx_seed_${n++}',
+          merchant: merchant,
+          amount: amount,
+          category: category,
+          timestamp: at,
+          source: scanned ? TxSource.ocrCapture : TxSource.manualEntry,
+          ocrConfidence: scanned ? 0.8 + rng.nextDouble() * 0.19 : 1.0,
+        ),
+      );
+    }
+
+    String pick(List<String> l) => l[rng.nextInt(l.length)];
+
+    for (var d = 0; d < seedDays; d++) {
+      final weekday = DateTime(now.year, now.month, now.day - d).weekday;
+      final weekend = weekday >= DateTime.saturday;
+
+      // Food: most days, bigger and more frequent at weekends.
+      // Always present on the first and last day so the history spans 60 days.
+      if (d == 0 ||
+          d == seedDays - 1 ||
+          rng.nextDouble() < (weekend ? 0.9 : 0.65)) {
+        final big = rng.nextDouble() < 0.2;
+        add(
+            d,
+            pick(_foodMerchants),
+            big ? money(60, 130) : money(5, weekend ? 45 : 25),
+            Categories.food);
+      }
+      if (weekend && rng.nextDouble() < 0.5) {
+        add(d, pick(_foodMerchants), money(10, 40), Categories.food);
+      }
+
+      // Transport: roughly every second or third day.
+      if (rng.nextDouble() < 0.35) {
+        add(d, pick(_transportMerchants), money(10, 65), Categories.transport);
+      }
+
+      // Other: occasional purchases plus a monthly bill.
+      if (rng.nextDouble() < 0.15) {
+        add(d, pick(_otherMerchants), money(15, 90), Categories.other);
+      }
+      if (d % 30 == 5) {
+        add(d, 'Mercury Energy', money(110, 160), Categories.other);
+      }
+    }
   }
 }

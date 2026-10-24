@@ -40,7 +40,7 @@ class _ReviewViewState extends State<ReviewView> {
       text: draft == null ? '' : draft.amount.toStringAsFixed(2),
     );
     _date = draft?.timestamp ?? DateTime.now();
-    _category = draft?.category ?? Categories.groceries;
+    _category = draft?.category ?? Categories.food;
   }
 
   @override
@@ -129,7 +129,6 @@ class _ReviewViewState extends State<ReviewView> {
               ),
             ),
           if (widget.imageFile != null) const SizedBox(height: 18),
-
           _FieldLabel('Merchant', confidence: ocr?.merchant.confidence),
           TextField(
             controller: _merchant,
@@ -137,12 +136,10 @@ class _ReviewViewState extends State<ReviewView> {
             decoration: const InputDecoration(hintText: 'Shop name'),
           ),
           const SizedBox(height: 16),
-
           _FieldLabel('Amount', confidence: ocr?.amount.confidence),
           TextField(
             controller: _amount,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
             ],
@@ -152,7 +149,6 @@ class _ReviewViewState extends State<ReviewView> {
             ),
           ),
           const SizedBox(height: 16),
-
           _FieldLabel('Date', confidence: ocr?.date.confidence),
           InkWell(
             onTap: _pickDate,
@@ -165,7 +161,6 @@ class _ReviewViewState extends State<ReviewView> {
             ),
           ),
           const SizedBox(height: 16),
-
           _FieldLabel('Category (suggested)',
               confidence: ocr?.category.confidence),
           CategoryPicker(
@@ -173,7 +168,6 @@ class _ReviewViewState extends State<ReviewView> {
             highlighted: ocr != null,
             onChanged: (v) => setState(() => _category = v),
           ),
-
           if (weakField != null) ...[
             const SizedBox(height: 18),
             PrivacyNote(
@@ -183,7 +177,6 @@ class _ReviewViewState extends State<ReviewView> {
                   'before saving.',
             ),
           ],
-
           const SizedBox(height: 26),
           FilledButton(
             onPressed: _save,
@@ -201,8 +194,7 @@ class _ReviewViewState extends State<ReviewView> {
                   style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
               TextButton(
                 onPressed: _discard,
-                style:
-                    TextButton.styleFrom(foregroundColor: AppTheme.danger),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.danger),
                 child: const Text('Discard'),
               ),
             ],

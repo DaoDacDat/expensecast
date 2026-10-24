@@ -40,7 +40,8 @@ class AuthViewModel extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> register(String email, String password) => signIn(email, password);
+  Future<bool> register(String email, String password) =>
+      signIn(email, password);
 
   void signOut() {
     _isSignedIn = false;

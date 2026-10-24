@@ -41,8 +41,8 @@ class CategoryPicker extends StatelessWidget {
             ),
             for (final c in Categories.all)
               ListTile(
-                leading: Icon(Categories.iconFor(c),
-                    color: Categories.colorFor(c)),
+                leading:
+                    Icon(Categories.iconFor(c), color: Categories.colorFor(c)),
                 title: Text(c),
                 trailing: c == value ? const Icon(Icons.check) : null,
                 onTap: () => Navigator.of(ctx).pop(c),

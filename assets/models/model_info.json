@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "model_file": "expensecast_gru_float32.tflite",
+  "format": "float32",
+  "model_sha256": "09b4b2f2a44494070830a7412c702a55e9291166b73b4f077eb740524b7dcdc8",
+  "model_size_bytes": 396868,
+  "model_size_MB": 0.396868,
+  "tflite_schema_version": 3,
+  "tensorflow_version": "2.20.0",
+  "keras_parameters": 8327,
+  "architecture": {
+    "gru_units": [32, 16],
+    "dense_units": 32,
+    "output_units": 7,
+    "output_activation": "softplus"
+  },
+  "lookback": 60,
+  "horizon": 7,
+  "batch_size": 1,
+  "currency": "INR",
+  "inputs": [
+    {"position": 0, "tensor_index": 0, "semantic_name": "history", "tensor_name": "history", "shape": [1, 60, 7], "dtype": "float32", "quantization": {"scale": 0.0, "zero_point": 0, "required": false}},
+    {"position": 1, "tensor_index": 1, "semantic_name": "future_calendar", "tensor_name": "future_calendar", "shape": [1, 7, 5], "dtype": "float32", "quantization": {"scale": 0.0, "zero_point": 0, "required": false}},
+    {"position": 2, "tensor_index": 2, "semantic_name": "category", "tensor_name": "category", "shape": [1, 3], "dtype": "float32", "quantization": {"scale": 0.0, "zero_point": 0, "required": false}}
+  ],
+  "outputs": [
+    {"position": 0, "tensor_index": 2426, "semantic_name": "daily_forecast", "tensor_name": "Identity", "shape": [1, 7], "dtype": "float32", "quantization": {"scale": 0.0, "zero_point": 0, "required": false}}
+  ],
+  "input_order": ["history", "future_calendar", "category"],
+  "history_features": ["amount_div_scale", "log_count_div_scale", "dow_sin", "dow_cos", "day_in_month", "year_sin", "year_cos"],
+  "future_features": ["dow_sin", "dow_cos", "day_in_month", "year_sin", "year_cos"],
+  "preprocessor": {
+    "categories": ["Food", "Other", "Transportation"],
+    "money_scales": {
+      "Food": 325.4186096191406,
+      "Other": 333.3571472167969,
+      "Transportation": 279.4210510253906
+    },
+    "count_scale": 1.7917594909667969
+  },
+  "fallback_categories": ["Apparel", "Beauty", "Education", "Gift", "Household", "Self-development", "Social Life"],
+  "calendar_definition": "dow/7 sincos; (day-1)/(days_in_month-1); (dayofyear-1)/(365 or 366) sincos",
+  "scaling_definition": "amount / max(1, train positive-day mean); log1p(count)/train count_scale",
+  "output_definition": "Seven scaled daily amounts for the selected category; days start immediately after the last history day. Multiply by that category's money scale after inference; clamp at zero. Sum all seven for a weekly total.",
+  "input_date_order": "Oldest to newest; 60 consecutive calendar dates. Calendar uses Monday=0 and the local ledger date, with UTC dates used only for calendar arithmetic.",
+  "input_ledger_definition": "Daily expense sums in INR and transaction counts for ONE category. Do not include income. Zero fill only when the ledger is complete. Do not mix unconverted currencies.",
+  "quantization_required": false,
+  "requires_select_tf_ops": false,
+  "operator_codes": [
+    {"name": "RESHAPE", "version": 1},
+    {"name": "UNPACK", "version": 1},
+    {"name": "FULLY_CONNECTED", "version": 1},
+    {"name": "SPLIT", "version": 1},
+    {"name": "ADD", "version": 1},
+    {"name": "LOGISTIC", "version": 1},
+    {"name": "SUB", "version": 1},
+    {"name": "MUL", "version": 1},
+    {"name": "TANH", "version": 1},
+    {"name": "STRIDED_SLICE", "version": 1},
+    {"name": "PACK", "version": 1},
+    {"name": "CONCATENATION", "version": 1},
+    {"name": "EXP", "version": 1},
+    {"name": "LOG", "version": 1}
+  ],
+  "export_validation": {
+    "passed": true,
+    "scaled_rtol": 0.0001,
+    "scaled_atol": 1e-05,
+    "max_abs_scaled_difference": 1.1920928955078125e-07,
+    "mean_abs_money_difference": 1.011323326695544e-05,
+    "MAE_daily_INR": 118.10490152276222,
+    "MAE_total_7d_INR": 641.7572306007102,
+    "test_origins": 1,
+    "target_device_flutter_tested": false
+  },
+  "flutter_api": "runForMultipleInputs; list order = inputs.position; output map key = outputs.position. tensor_index is an internal graph id, NOT the Flutter output map key."
+}

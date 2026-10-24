@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../core/categories.dart';
 import '../models/budget.dart';
 import '../viewmodels/budget_view_model.dart';
-import '../viewmodels/forecast_view_model.dart';
 import '../viewmodels/transaction_view_model.dart';
 import '../widgets/budget_progress_tile.dart';
 
@@ -62,8 +61,8 @@ class BudgetView extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             FilledButton(
-              onPressed: () => Navigator.of(ctx)
-                  .pop(double.tryParse(controller.text) ?? 0),
+              onPressed: () =>
+                  Navigator.of(ctx).pop(double.tryParse(controller.text) ?? 0),
               child: const Text('Save budget'),
             ),
             const SizedBox(height: 10),
@@ -78,12 +77,6 @@ class BudgetView extends StatelessWidget {
     vm.updateBudget(
       Budget(category: category, limit: result, period: vm.period),
     );
-
-    if (!context.mounted) return;
-    final tx = context.read<TransactionViewModel>();
-    context
-        .read<ForecastViewModel>()
-        .refreshForecast(tx.transactions, vm.budgets);
   }
 
   Future<void> _addCategoryBudget(BuildContext context) async {

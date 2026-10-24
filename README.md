@@ -1,106 +1,125 @@
-# ExpenseCast — Milestone 1 (UI + Receipt Capture)
+# ExpenseCast
 
-Bản dựng Flutter cho *Predictive Expense Management App* (COMP826, Dac Dat Dao — 25301423).
-Phạm vi bản này đúng như yêu cầu: **toàn bộ giao diện 6 màn hình + chức năng chụp ảnh hoá đơn hoạt động thật**.
-OCR và dự báo hiện là bản giả lập/heuristic, đặt sau interface để Sprint 2–3 thay thế mà không phải sửa UI.
+**Predictive Expense Management App** — COMP826 project by Dac Dat Dao (ID 25301423).
+A Flutter app (Android and iOS) that turns a photo of a receipt into a transaction and turns the transaction history into a weekly spending forecast, **entirely on the phone**. THIS PROJECT HAS BEEN TESTED ON IOS DEVICE, NOT ON ANDROID SO YOU SHOULD RUN ON IOS TO MAKE SURE IT WILL WORK CORRECTLY.
+
+The Milestone 2 report (development and evaluation) is in [`report/`](report/); the Milestone 1 version of the sources is kept in `report/_backup_pre_feedback/`.
 
 ---
 
-## 1. Chạy thử
+## Why it is useful
+
+Students on a tight budget usually find out they have overspent *after* the money is gone. Bank apps show what was spent, not what is likely to happen next, and apps that do forecast (Mint, Expensify, YNAB) either need a bank link and an account on someone else's server or need every purchase typed in by hand.
+
+ExpenseCast removes both barriers:
+
+* **Low effort** — scan a receipt; the app reads amount, merchant and date and shows a confidence for *each field*, so the user checks only the one it is unsure about.
+* **Early warning** — a small recurrent model (GRU) forecasts the next 7 days per category and marks each budget *on track*, *watch* or *at risk*.
+* **Private** — there is no server. Receipts, history and the model all stay on the device, and the scanned image is deleted after use.
+
+## Key facts
+
+| | |
+|---|---|
+| Platforms | Android; iOS 15.5 or later (physical device needed for the scanner) |
+| Toolchain | Flutter 3.27 or later, Dart 3.6 or later |
+| Architecture | MVVM with `provider` and `ChangeNotifier`; services behind interfaces, injected in `lib/app.dart` |
+| Size | 34 Dart files, 4,343 lines in `lib/` (10 views, 6 widgets, 4 ViewModels) |
+| Receipt capture | `cunning_document_scanner` (ML Kit document scanner on Android, VisionKit on iOS) → `google_mlkit_text_recognition` (on-device OCR) → rule-based `receipt_parser.dart` |
+| Forecast model | Two GRU layers (32 and 16 units), 8,327 parameters, float32, 0.40 MB, run through `tflite_flutter`; input history `[1,60,7]`, future calendar `[1,7,5]`, category one-hot `[1,3]`; output 7 daily values; categories Food, Other, Transportation |
+| Model contract | [`assets/models/model_info.json`](assets/models/model_info.json) (tensor shapes, scales, SHA-256 of the model file; the app checks the tensor shapes when it loads the model) |
+| Model provenance | Trained offline on a public Kaggle ledger of 102 days in INR ([tharunprabu/my-expenses-data](https://www.kaggle.com/datasets/tharunprabu/my-expenses-data)) |
+| Fallback | If the model is missing, the contract check fails or history is too short, the app shows a 7-day moving average and says so on screen |
+| Tests | 24 test cases in `test/` (parser, ViewModels, forecast engine, model-input golden values) |
+| Sign-in | Simulated: any valid e-mail and a password of 6 or more characters |
+| Data | In memory only; the first launch seeds 60 days of demo data |
+
+## How to run
+
+You need a Flutter SDK (3.27 or later) and either an Android phone with USB debugging or an iPhone with a developer certificate. The emulator can run everything except the scanner.
 
 ```bash
-# 1. Giải nén rồi vào thư mục
+git clone https://github.com/DaoDacDat/expensecast.git
 cd expensecast
 
-# 2. Sinh phần native (android/, ios/) cho máy của bạn.
-#    Lệnh này KHÔNG ghi đè các file đã có sẵn trong gói.
-flutter create . --project-name expensecast --platforms android,ios
-
-# 3. Cài package
+flutter doctor            # fix anything it reports first
 flutter pub get
 
-# 4. Chạy trên thiết bị thật (camera không hoạt động trên emulator/simulator)
-flutter run
+# iOS only
+cd ios && pod install && cd ..
+# then open ios/Runner.xcworkspace once in Xcode and choose your signing team
+
+flutter devices           # find your device id
+flutter run -d <device-id>
 ```
 
-> **Lưu ý:** tài khoản đăng nhập là giả lập — nhập bất kỳ email hợp lệ và mật khẩu ≥ 6 ký tự là vào được.
-
-### Cấu hình quyền
-
-* **Android** — `android/app/src/main/AndroidManifest.xml` đã có sẵn `CAMERA` và `READ_MEDIA_IMAGES`.
-  Mở `android/app/build.gradle` và đặt `minSdkVersion 21` (gói `camera` yêu cầu).
-* **iOS** — mở `ios/Runner/Info.plist` và dán các khoá trong `ios/Runner/Info.plist.additions.xml`
-  vào trong `<dict>` gốc. Trong `ios/Podfile` đặt `platform :ios, '12.0'`.
-
----
-
-## 2. Bản đồ code ↔ báo cáo
-
-| Thành phần trong báo cáo | File |
-|---|---|
-| MVVM — View | `lib/views/*.dart` |
-| MVVM — ViewModel (`ChangeNotifier`) | `lib/viewmodels/*.dart` |
-| Entity `Transaction`, `Budget`, `ForecastResult`, enum `TxSource`/`BudgetPeriod` | `lib/models/` |
-| `IReceiptCapture` / `MlKitOcrService` | `lib/services/ocr_service.dart` |
-| `IForecastService` / `ForecastEngine` | `lib/services/forecast_service.dart` |
-| Navigation model (Figure 9) | `lib/views/shell_view.dart` + `Navigator` trong từng View |
-| Mockup 1 — Login / Register | `lib/views/login_view.dart` |
-| Mockup 2 — Home | `lib/views/home_view.dart` |
-| Mockup 3 — Receipt Capture | `lib/views/capture_view.dart` |
-| Mockup 4 — OCR Review & Confirm | `lib/views/review_view.dart` |
-| Mockup 5 — Budgets | `lib/views/budget_view.dart` |
-| Mockup 6 — Insights & Forecast | `lib/views/insights_view.dart` |
-| Manual Transaction | `lib/views/manual_transaction_view.dart` |
-| History & Export, Settings & Privacy | `lib/views/history_view.dart`, `lib/views/more_view.dart` |
-
-Ba quyết định thiết kế nêu ở mục 5.4 được cài đặt đúng như mô tả:
-
-1. Màn hình chụp ghi rõ trên giao diện *"On-device OCR · image never uploaded"*.
-2. Màn hình Review hiển thị độ tin cậy **từng trường** và nêu đích danh trường yếu nhất
-   (`OcrResult.weakestFieldName`), thay vì một điểm confidence tổng.
-3. Màn hình Insights thu gọn mỗi danh mục thành một trạng thái (`on track` / `watch` / `at risk`)
-   thay vì đổ ra toàn bộ số liệu.
-
----
-
-## 3. Luồng chụp hoá đơn (đã chạy được)
-
-`Home → FAB "Scan receipt" → CaptureView → chụp → OCR → ReviewView → Save → Home`
-
-`CaptureView` đã xử lý đầy đủ:
-
-* liệt kê camera, chọn camera sau, khởi tạo `CameraController` (không bật audio);
-* khung canh hoá đơn bốn góc chữ L + làm tối vùng ngoài;
-* bật/tắt đèn flash (`FlashMode.torch`), chọn ảnh từ thư viện;
-* giải phóng camera khi app xuống nền và khởi tạo lại khi quay lại (`didChangeAppLifecycleState`);
-* thông báo rõ ràng khi người dùng từ chối quyền, khi máy không có camera, hoặc khi chụp lỗi —
-  kèm lối thoát "Choose a photo instead".
-
-Ảnh chụp nằm trong thư mục tạm của app; chưa có bước xoá sau khi trích xuất — sẽ làm ở Sprint 2
-cùng lúc với OCR thật.
-
----
-
-## 4. Việc còn lại theo kế hoạch trong báo cáo
-
-| Sprint | Việc | Chỗ cần sửa |
-|---|---|---|
-| 2 | OCR thật bằng `google_mlkit_text_recognition` | tạo `MlKitOcrService implements OcrService`, đổi một dòng trong `lib/app.dart` |
-| 2 | Lưu bền vững bằng `sqflite` | thêm `TransactionRepository`/`BudgetRepository`, ViewModel gọi repository thay vì list trong bộ nhớ |
-| 3 | Dự báo TensorFlow Lite | tạo `ForecastEngine implements ForecastService` (chạy trong isolate qua `compute`) |
-| 3 | Thông báo at-risk | `flutter_local_notifications`, gọi từ `ForecastViewModel` khi `isAtRisk` |
-| 3 | Xuất CSV ra file | `HistoryView._exportCsv` hiện copy vào clipboard; đổi sang `path_provider` + `share_plus` |
-
-Vì mọi ViewModel chỉ phụ thuộc vào interface, các bước trên không đụng tới code giao diện.
-
----
-
-## 5. Test
+Optional checks:
 
 ```bash
-flutter test
+flutter analyze
+flutter test              # note: test/widget_test.dart is a stale default test and fails; the other 23 cases target current code
 ```
 
-`test/view_model_test.dart` kiểm tra logic bản nháp OCR, quy tắc `correctedOcr`, kiểm tra hợp lệ
-trước khi lưu, và việc lọc danh mục vượt hạn mức — dùng service stub, đúng như lập luận về
-testability ở mục 7.3 của báo cáo.
+On first launch sign in with any valid e-mail and a password of 6 or more characters. Open **Scan** to capture a receipt, **Review** to confirm it, and **Insights** to run a forecast.
+
+## Reproduce the forecast evaluation
+
+The back-test used in the Milestone 2 report loads the app's own model file and runs it on synthetic ledgers (about three seconds, fixed seeds).
+
+```bash
+pip install ai-edge-litert numpy
+python3 report/evaluation/eval_forecast.py \
+    assets/models/expensecast_gru_float32.tflite \
+    report/evaluation/eval_results.json \
+    assets/models/model_info.json
+```
+
+## Repository layout
+
+```text
+lib/
+  main.dart, app.dart        entry point and dependency injection
+  core/                      theme, categories, formatters
+  models/                    Transaction, Budget, OcrResult, ForecastResult, ForecastMethod
+  services/                  ocr_service, receipt_parser, forecast_service, gru_forecaster
+  viewmodels/                auth, transaction, budget, forecast
+  views/                     login, shell, home, capture, review, manual entry, budgets,
+                             insights, history, more
+  widgets/                   risk card, forecast chart, tiles, pickers, privacy note
+assets/models/               GRU model (.tflite) and its contract (model_info.json)
+test/                        unit and golden tests
+report/                      LaTeX reports, diagrams, figures, evaluation script and results
+```
+
+## Code-to-report map (Milestone 2)
+
+| Report element | Source |
+|---|---|
+| Dependency injection | `lib/app.dart` |
+| Scan and Review pages (F3, F4) | `lib/views/capture_view.dart`, `lib/views/review_view.dart` |
+| OCR service and stub | `lib/services/ocr_service.dart` |
+| Parser and per-field confidence | `lib/services/receipt_parser.dart`, `lib/models/ocr_result.dart` |
+| Forecast engine, fallback, scaling | `lib/services/forecast_service.dart` |
+| Model contract and input builder | `lib/services/gru_forecaster.dart`, `assets/models/model_info.json` |
+| ViewModels | `lib/viewmodels/*.dart` |
+| Insights, risk cards, chart (F7) | `lib/views/insights_view.dart`, `lib/widgets/risk_card.dart`, `lib/widgets/forecast_chart.dart` |
+| Tests | `test/*.dart` |
+| Back-test script and results | `report/evaluation/` |
+
+## Known limitations
+
+These are discussed in the Milestone 2 report (Conclusion and Recommendations).
+
+* Transactions and budgets are not stored: they are lost when the app restarts. There is no server, real sign-in or notifications.
+* On the real 102-day ledger and on synthetic ledgers the GRU is **less accurate than a plain moving average**; the app therefore labels the method it used. Treat *watch* and *at risk* as estimates.
+* Spending on Home and Budgets is calculated over the calendar month and ignores the chosen budget period.
+* Every scanned receipt is currently saved with the *corrected* flag.
+* The recogniser reads Latin script only, and the parser is tuned to New Zealand receipts.
+* OCR accuracy, phone performance and usability with real users were not measured.
+
+## Building the reports
+
+```bash
+cd report
+latexmk -pdf main.tex      # needs a TeX Live installation with tikz, natbib, xltabular, listings
+```

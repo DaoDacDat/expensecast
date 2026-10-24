@@ -9,10 +9,18 @@ import '../models/forecast_result.dart';
 /// Per section 5.4, each category is condensed into *a single status* instead of
 /// a set of figures, to reduce the user's cognitive load.
 class RiskCard extends StatelessWidget {
-  const RiskCard({super.key, required this.result, this.onTap});
+  const RiskCard({
+    super.key,
+    required this.result,
+    this.onTap,
+    this.selected = false,
+  });
 
   final ForecastResult result;
   final VoidCallback? onTap;
+
+  /// Highlights the card whose data is currently shown in the chart.
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +33,12 @@ class RiskCard extends StatelessWidget {
     };
 
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: selected
+            ? BorderSide(color: theme.colorScheme.primary, width: 1.5)
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),

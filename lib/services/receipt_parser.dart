@@ -303,7 +303,7 @@ class ReceiptParser {
   // --------------------------------------------------------------- category
 
   static final _categoryKeywords = <String, List<String>>{
-    Categories.groceries: [
+    Categories.food: [
       'new world',
       'countdown',
       'woolworths',
@@ -318,26 +318,6 @@ class ReceiptParser {
       'grocer',
       'butcher',
       'produce',
-    ],
-    Categories.transport: [
-      'z energy',
-      r'\bbp\b',
-      'mobil',
-      'caltex',
-      'gull',
-      'waitomo',
-      'fuel',
-      'petrol',
-      'diesel',
-      'unleaded',
-      'parking',
-      'at hop',
-      'uber',
-      'taxi',
-      r'\bbus\b',
-      'train',
-    ],
-    Categories.eatingOut: [
       'cafe',
       'café',
       'coffee',
@@ -359,7 +339,25 @@ class ReceiptParser {
       'flat white',
       'bakery',
     ],
-    Categories.utilities: [
+    Categories.transport: [
+      'z energy',
+      r'\bbp\b',
+      'mobil',
+      'caltex',
+      'gull',
+      'waitomo',
+      'fuel',
+      'petrol',
+      'diesel',
+      'unleaded',
+      'parking',
+      'at hop',
+      'uber',
+      'taxi',
+      r'\bbus\b',
+      'train',
+    ],
+    Categories.other: [
       'mercury',
       'genesis',
       'contact energy',

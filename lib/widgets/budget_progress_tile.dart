@@ -86,7 +86,8 @@ class BudgetProgressTile extends StatelessWidget {
                   ? '${Fmt.money(spent)} spent · over by ${Fmt.money(spent - limit)}'
                   : '${Fmt.money(spent)} spent · ${Fmt.money(limit - spent)} left',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: over ? AppTheme.danger : theme.colorScheme.onSurfaceVariant,
+                color:
+                    over ? AppTheme.danger : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],

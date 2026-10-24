@@ -56,11 +56,9 @@ class BudgetViewModel extends ChangeNotifier {
 
   void _seed() {
     _budgets.addAll(const [
-      Budget(category: Categories.groceries, limit: 400),
+      Budget(category: Categories.food, limit: 550),
       Budget(category: Categories.transport, limit: 200),
-      Budget(category: Categories.eatingOut, limit: 150),
-      Budget(category: Categories.utilities, limit: 180),
-      Budget(category: Categories.other, limit: 70),
+      Budget(category: Categories.other, limit: 250),
     ]);
   }
 }

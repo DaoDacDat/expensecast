@@ -27,7 +27,7 @@ class ExpenseCastApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => BudgetViewModel()),
         ChangeNotifierProvider(
-          create: (_) => ForecastViewModel(service: HeuristicForecastService()),
+          create: (_) => ForecastViewModel(service: ForecastEngine()),
         ),
       ],
       child: MaterialApp(

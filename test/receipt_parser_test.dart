@@ -16,7 +16,7 @@ ReceiptLine line(String text, int row, {double x = 20, double? conf}) =>
 void main() {
   final parser = ReceiptParser(clock: () => DateTime(2026, 9, 25, 12));
 
-  test('đọc hoá đơn siêu thị với nhãn và số tiền ở hai cột', () {
+  test('reads a supermarket receipt with the label and amount in two columns', () {
     final result = parser.parse([
       line('NEW WORLD VICTORIA ST', 0),
       line('GST No: 123-456-789', 1),
@@ -38,11 +38,11 @@ void main() {
     expect(result.merchant.value, 'New World Victoria St');
     expect(result.amount.value, 54.20);
     expect(result.date.value, DateTime(2026, 9, 18));
-    expect(result.category.value, Categories.groceries);
+    expect(result.category.value, Categories.food);
     expect(result.weakestFieldName, isNull);
   });
 
-  test('"TOTAL INCL GST" vẫn là tổng, số tiền kiểu 1,234.50', () {
+  test('"TOTAL INCL GST" is still the total, with amounts like 1,234.50', () {
     final result = parser.parse([
       line('Mercury Energy', 0),
       line('Account 1234567', 1),
@@ -51,10 +51,10 @@ void main() {
     ], imagePath: 'r.jpg');
 
     expect(result.amount.value, 1234.50);
-    expect(result.category.value, Categories.utilities);
+    expect(result.category.value, Categories.other);
   });
 
-  test('số tiền nằm ở hàng ngay dưới nhãn', () {
+  test('amount is on the row just below the label', () {
     final result = parser.parse([
       line('Coffee Club', 0),
       line('Flat White', 1),
@@ -64,10 +64,10 @@ void main() {
     ], imagePath: 'r.jpg');
 
     expect(result.amount.value, 5.50);
-    expect(result.category.value, Categories.eatingOut);
+    expect(result.category.value, Categories.food);
   });
 
-  test('không có nhãn tổng: lấy số lớn nhất và đánh dấu kém tự tin', () {
+  test('no total label: takes the largest amount and marks it low confidence', () {
     final result = parser.parse([
       line('Z ENERGY SYMONDS ST', 0),
       line('Unleaded 91', 1),
@@ -81,7 +81,7 @@ void main() {
     expect(result.category.value, Categories.transport);
   });
 
-  test('ngày dạng chữ và ISO; bỏ qua ngày ở tương lai', () {
+  test('written-out and ISO dates; ignores future dates', () {
     DateTime dateOf(String text) => parser
         .parse([line('Shop', 0), line(text, 1)], imagePath: 'r.jpg')
         .date
@@ -90,15 +90,15 @@ void main() {
     expect(dateOf('18 Sep 2026'), DateTime(2026, 9, 18));
     expect(dateOf('Sept 3, 2026'), DateTime(2026, 9, 3));
     expect(dateOf('2026-08-01'), DateTime(2026, 8, 1));
-    expect(dateOf('09/13/2026'), DateTime(2026, 9, 13), reason: 'kiểu Mỹ');
+    expect(dateOf('09/13/2026'), DateTime(2026, 9, 13), reason: 'US style');
 
     final future =
         parser.parse([line('Shop', 0), line('01/12/2026', 1)], imagePath: '');
     expect(future.date.isLowConfidence, isTrue,
-        reason: '1/12/2026 ở tương lai, không được đọc thành 12/1');
+        reason: '1/12/2026 is in the future, so it must not be read as 12/1');
   });
 
-  test('ngày dạng 18.08.26 không bị đọc thành số tiền', () {
+  test('a date like 18.08.26 is not read as an amount', () {
     final result = parser.parse([
       line('Four Square', 0),
       line('18.08.26', 1),
@@ -108,7 +108,7 @@ void main() {
     expect(result.date.value, DateTime(2026, 8, 18));
   });
 
-  test('confidence thấp từ OCR kéo confidence của trường xuống', () {
+  test('low OCR confidence lowers the field confidence', () {
     final result = parser.parse([
       line('Countdown Metro', 0),
       line('Date 20/09/2026', 1),

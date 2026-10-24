@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:expensecast/core/categories.dart';
 import 'package:expensecast/models/budget.dart';
+import 'package:expensecast/models/forecast_method.dart';
 import 'package:expensecast/models/forecast_result.dart';
 import 'package:expensecast/models/ocr_result.dart';
 import 'package:expensecast/models/transaction.dart';
@@ -19,7 +20,7 @@ class _FixedOcrService implements OcrService {
         merchant: const OcrField('Test Mart', 0.95),
         amount: const OcrField(12.34, 0.60),
         date: OcrField(DateTime(2026, 8, 18), 0.92),
-        category: const OcrField(Categories.groceries, 0.88),
+        category: const OcrField(Categories.food, 0.88),
         imagePath: image.path,
       );
 }
@@ -28,21 +29,29 @@ class _FixedForecastService implements ForecastService {
   @override
   Future<List<ForecastResult>> predict(
     List<Transaction> transactions,
-    List<Budget> budgets,
-  ) async =>
+    List<Budget> budgets, {
+    ForecastMethod method = ForecastMethod.gru,
+    ForecastHorizon horizon = ForecastHorizon.month,
+  }) async =>
       const [
         ForecastResult(
-          category: Categories.eatingOut,
+          category: Categories.food,
           predictedSpend: 168,
           budgetLimit: 150,
           riskRatio: 1.12,
+        ),
+        ForecastResult(
+          category: Categories.transport,
+          predictedSpend: 90,
+          budgetLimit: 200,
+          riskRatio: 0.45,
         ),
       ];
 }
 
 void main() {
   group('TransactionViewModel', () {
-    test('OCR tạo bản nháp nhưng chưa lưu cho tới khi commit', () async {
+    test('OCR creates a draft but does not save it until commit', () async {
       final vm = TransactionViewModel(ocrService: _FixedOcrService());
       final before = vm.transactions.length;
 
@@ -50,14 +59,14 @@ void main() {
 
       expect(vm.draft, isNotNull);
       expect(vm.draft!.merchant, 'Test Mart');
-      expect(vm.transactions.length, before, reason: 'chưa commit');
+      expect(vm.transactions.length, before, reason: 'not committed yet');
 
       expect(vm.commitDraft(), isTrue);
       expect(vm.transactions.length, before + 1);
       expect(vm.draft, isNull);
     });
 
-    test('sửa trường của bản nháp OCR đổi nguồn thành correctedOcr', () async {
+    test('editing a field of an OCR draft changes its source to correctedOcr', () async {
       final vm = TransactionViewModel(ocrService: _FixedOcrService());
       await vm.addFromReceipt(File('fake_receipt.jpg'));
 
@@ -67,7 +76,7 @@ void main() {
       expect(vm.draft!.source, TxSource.correctedOcr);
     });
 
-    test('không lưu được khi thiếu merchant hoặc số tiền', () {
+    test('cannot save when the merchant or amount is missing', () {
       final vm = TransactionViewModel(ocrService: _FixedOcrService());
       vm.startManualDraft();
 
@@ -75,7 +84,7 @@ void main() {
       expect(vm.error, isNotNull);
     });
 
-    test('trường yếu nhất được nêu đích danh', () async {
+    test('the weakest field is named explicitly', () async {
       final vm = TransactionViewModel(ocrService: _FixedOcrService());
       await vm.addFromReceipt(File('fake_receipt.jpg'));
 
@@ -84,13 +93,27 @@ void main() {
   });
 
   group('ForecastViewModel', () {
-    test('lọc ra danh mục vượt hạn mức', () async {
+    test('filters out categories over their limit', () async {
       final vm = ForecastViewModel(service: _FixedForecastService());
       await vm.refreshForecast(const [], const []);
 
-      expect(vm.results.length, 1);
+      expect(vm.results.length, 2);
       expect(vm.atRisk.length, 1);
       expect(vm.results.first.state, RiskState.atRisk);
+    });
+
+    test('selecting a category changes the charted result', () async {
+      final vm = ForecastViewModel(service: _FixedForecastService());
+      await vm.refreshForecast(const [], const []);
+      expect(vm.selected!.category, Categories.food,
+          reason: 'default: riskiest');
+
+      vm.selectCategory(Categories.transport);
+      expect(vm.selected!.category, Categories.transport);
+
+      vm.selectCategory('Nope');
+      expect(vm.selected!.category, Categories.food,
+          reason: 'unknown category falls back to the first result');
     });
   });
 }
