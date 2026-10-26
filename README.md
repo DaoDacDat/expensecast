@@ -3,7 +3,6 @@
 **Predictive Expense Management App** — COMP826 project by Dac Dat Dao (ID 25301423).
 A Flutter app (Android and iOS) that turns a photo of a receipt into a transaction and turns the transaction history into a weekly spending forecast, **entirely on the phone**. THIS PROJECT HAS BEEN TESTED ON IOS DEVICE, NOT ON ANDROID SO YOU SHOULD RUN ON IOS TO MAKE SURE IT WILL WORK CORRECTLY.
 
-The Milestone 2 report (development and evaluation) is in [`report/`](report/); the Milestone 1 version of the sources is kept in `report/_backup_pre_feedback/`.
 
 ---
 
